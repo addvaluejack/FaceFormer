@@ -52,11 +52,13 @@ def test_model(args):
     speech_array, sampling_rate = librosa.load(os.path.join(wav_path), sr=16000)
     processor = Wav2Vec2Processor.from_pretrained("facebook/wav2vec2-base-960h")
     audio_feature = np.squeeze(processor(speech_array,sampling_rate=16000).input_values)
+    print(f"speech_array shape: {speech_array.shape}")
+    print(f"Audio feature shape: {audio_feature.shape}")
     audio_feature = np.reshape(audio_feature,(-1,audio_feature.shape[0]))
     audio_feature = torch.FloatTensor(audio_feature).to(device=args.device)
 
     prediction = model.predict(audio_feature, template, one_hot)
-    prediction = prediction.squeeze() # (seq_len, V*3)
+    prediction = prediction.squeeze() # (seq_len, V*3) V represents the number of vertices
     np.save(os.path.join(args.result_path, test_name), prediction.detach().cpu().numpy())
 
 # The implementation of rendering is borrowed from VOCA: https://github.com/TimoBolkart/voca/blob/master/utils/rendering.py
